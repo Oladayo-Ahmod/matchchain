@@ -1,16 +1,17 @@
 'use client';
 
-import { forwardRef, InputHTMLAttributes } from 'react';
+import { forwardRef, SelectHTMLAttributes } from 'react';
 import { cn } from '../../lib/utils';
 
-export interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
+export interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
   error?: string;
   label?: string;
   helperText?: string;
+  options: { value: string; label: string }[];
 }
 
-const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ className, type = 'text', error, label, helperText, ...props }, ref) => {
+const Select = forwardRef<HTMLSelectElement, SelectProps>(
+  ({ className, error, label, helperText, options, ...props }, ref) => {
     return (
       <div className="w-full">
         {label && (
@@ -18,19 +19,24 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {label}
           </label>
         )}
-        <input
-          type={type}
+        <select
           className={cn(
             'flex h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm ring-offset-white',
-            'placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+            'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
             'disabled:cursor-not-allowed disabled:opacity-50',
-            'dark:border-gray-600 dark:bg-gray-800 dark:ring-offset-gray-900 dark:placeholder:text-gray-400 dark:focus:ring-blue-400',
+            'dark:border-gray-600 dark:bg-gray-800 dark:ring-offset-gray-900 dark:focus:ring-blue-400',
             error && 'border-red-500 focus:ring-red-500 dark:focus:ring-red-400',
             className
           )}
           ref={ref}
           {...props}
-        />
+        >
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
         {error && (
           <p className="mt-1 text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
@@ -42,6 +48,6 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
   }
 );
 
-Input.displayName = 'Input';
+Select.displayName = 'Select';
 
-export { Input };
+export { Select };

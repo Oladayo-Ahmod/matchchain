@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Input } from '../../components/ui/Input';
 import { Button } from '../../components/ui/Button';
+import { Select } from '../../components/ui/Select';
 
 export function JobFilters() {
   const [filters, setFilters] = useState({
@@ -11,7 +12,24 @@ export function JobFilters() {
     minBudget: '',
     maxBudget: '',
     skills: '',
+    experienceLevel: '',
+    jobType: '',
   });
+
+  const experienceLevels = [
+    { value: '', label: 'Any experience' },
+    { value: 'entry', label: 'Entry Level' },
+    { value: 'mid', label: 'Mid Level' },
+    { value: 'senior', label: 'Senior Level' },
+  ];
+
+  const jobTypes = [
+    { value: '', label: 'Any type' },
+    { value: 'full-time', label: 'Full Time' },
+    { value: 'part-time', label: 'Part Time' },
+    { value: 'contract', label: 'Contract' },
+    { value: 'freelance', label: 'Freelance' },
+  ];
 
   const handleFilterChange = (key: string, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));
@@ -23,6 +41,8 @@ export function JobFilters() {
       minBudget: '',
       maxBudget: '',
       skills: '',
+      experienceLevel: '',
+      jobType: '',
     });
   };
 
@@ -33,18 +53,28 @@ export function JobFilters() {
       </CardHeader>
       <CardContent className="space-y-4">
         {/* Search */}
-        <div>
-          <label htmlFor="search" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Search Jobs
-          </label>
-          <Input
-            id="search"
-            type="text"
-            placeholder="Job title or description..."
-            value={filters.search}
-            onChange={(e) => handleFilterChange('search', e.target.value)}
-          />
-        </div>
+        <Input
+          label="Search Jobs"
+          placeholder="Job title or description..."
+          value={filters.search}
+          onChange={(e) => handleFilterChange('search', e.target.value)}
+        />
+
+        {/* Experience Level */}
+        <Select
+          label="Experience Level"
+          options={experienceLevels}
+          value={filters.experienceLevel}
+          onChange={(e) => handleFilterChange('experienceLevel', e.target.value)}
+        />
+
+        {/* Job Type */}
+        <Select
+          label="Job Type"
+          options={jobTypes}
+          value={filters.jobType}
+          onChange={(e) => handleFilterChange('jobType', e.target.value)}
+        />
 
         {/* Budget Range */}
         <div>
@@ -68,18 +98,13 @@ export function JobFilters() {
         </div>
 
         {/* Skills */}
-        <div>
-          <label htmlFor="skills" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-            Skills
-          </label>
-          <Input
-            id="skills"
-            type="text"
-            placeholder="e.g., Solidity, React, TypeScript"
-            value={filters.skills}
-            onChange={(e) => handleFilterChange('skills', e.target.value)}
-          />
-        </div>
+        <Input
+          label="Skills"
+          placeholder="e.g., Solidity, React, TypeScript"
+          value={filters.skills}
+          onChange={(e) => handleFilterChange('skills', e.target.value)}
+          helperText="Separate skills with commas"
+        />
 
         {/* Filter Actions */}
         <div className="flex space-x-2 pt-2">
