@@ -88,5 +88,5 @@ contract EscrowVaultTest is Test {
          console.log("status:", uint256(status));
     }
 
-
+    receive() external payable {}
 }
