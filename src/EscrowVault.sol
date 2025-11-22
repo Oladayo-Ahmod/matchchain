@@ -19,14 +19,13 @@ contract EscrowVault {
     mapping(uint256 => uint256) public jobToEscrow;
     uint256 public escrowCount;
 
-    event EscrowCreated(uint256 indexed escrowId, uint256 indexed jobId, address employer, uint256 amount);
+    event EscrowCreated(uint256 indexed escrowId, uint256 indexed jobId, address employer);
     event EscrowFunded(uint256 indexed escrowId, uint256 amount);
     event EscrowReleased(uint256 indexed escrowId, address freelancer, uint256 amount);
     event EscrowRefunded(uint256 indexed escrowId, address employer, uint256 amount);
     event EscrowCancelled(uint256 indexed escrowId);
 
-    function createEscrow(uint256 _jobId, address _freelancer) external payable returns (uint256) {
-        require(msg.value > 0, "Must send ETH to create escrow");
+    function createEscrow(uint256 _jobId, address _freelancer) external returns (uint256) {
         require(jobToEscrow[_jobId] == 0, "Escrow already exists for job");
 
         escrowCount++;
@@ -35,18 +34,29 @@ contract EscrowVault {
             employer: msg.sender,
             freelancer: _freelancer,
             jobId: _jobId,
-            amount: msg.value,
-            status: EscrowStatus.Funded,
+            amount: 0,
+            status: EscrowStatus.Created,
             createdAt: block.timestamp,
             releasedAt: 0
         });
 
         jobToEscrow[_jobId] = escrowCount;
 
-        emit EscrowCreated(escrowCount, _jobId, msg.sender, msg.value);
-        emit EscrowFunded(escrowCount, msg.value);
+        emit EscrowCreated(escrowCount, _jobId, msg.sender);
         
         return escrowCount;
+    }
+
+    function fundEscrow(uint256 _escrowId) external payable {
+        Escrow storage escrow = escrows[_escrowId];
+        require(msg.sender == escrow.employer, "Only employer can fund");
+        require(escrow.status == EscrowStatus.Created, "Escrow not in Created state");
+        require(msg.value > 0, "Must send ETH to fund escrow");
+
+        escrow.amount = msg.value;
+        escrow.status = EscrowStatus.Funded;
+
+        emit EscrowFunded(_escrowId, msg.value);
     }
 
     function releaseMilestone(uint256 _escrowId) external {
@@ -64,7 +74,7 @@ contract EscrowVault {
         emit EscrowReleased(_escrowId, escrow.freelancer, escrow.amount);
     }
 
-    function refund(uint256 _escrowId) external {
+    function refundEscrow(uint256 _escrowId) external {
         Escrow storage escrow = escrows[_escrowId];
         require(msg.sender == escrow.employer, "Only employer can refund");
         require(escrow.status == EscrowStatus.Funded, "Escrow not funded");
@@ -90,4 +100,6 @@ contract EscrowVault {
     function getEscrowByJob(uint256 _jobId) external view returns (Escrow memory) {
         return escrows[jobToEscrow[_jobId]];
     }
+
+     receive() external payable{}
 }
