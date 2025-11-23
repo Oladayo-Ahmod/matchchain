@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount, useContractWrite } from 'wagmi';
+import { useAccount } from 'wagmi';
+import { ethers } from 'ethers';
 import { Card, CardContent, CardHeader } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -9,11 +10,19 @@ import { Textarea } from '../components/ui/Textarea';
 import { ConnectWalletPrompt } from '../jobs/components/ConnectWalletPrompt';
 import { ethersClient } from '../lib/ethersClient';
 
+interface FormData {
+  title: string;
+  description: string;
+  budget: string;
+  deadline: string;
+  skills: string;
+}
+
 export default function PostJobPage() {
   const { isConnected, address } = useAccount();
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     title: '',
     description: '',
     budget: '',
@@ -21,38 +30,30 @@ export default function PostJobPage() {
     skills: '',
   }); 
 
-  const { writeAsync: createJob } = useContractWrite({
-    address: process.env.NEXT_PUBLIC_JOB_REGISTRY_ADDRESS as `0x${string}`,
-    abi: [
-      {
-        name: 'createJob',
-        type: 'function',
-        stateMutability: 'nonpayable',
-        inputs: [
-          { name: '_title', type: 'string' },
-          { name: '_description', type: 'string' },
-          { name: '_budget', type: 'uint256' },
-          { name: '_deadline', type: 'uint256' },
-        ],
-        outputs: [{ name: '', type: 'uint256' }],
-      },
-    ],
-    functionName: 'createJob',
-  });
-
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!isConnected || !address) return;
 
     setIsSubmitting(true);
     try {
-      // Create job on blockchain
-      const budgetWei = ethers.utils.parseEther(formData.budget);
-      const deadlineDays = Math.ceil((new Date(formData.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+      // Get provider and signer from wagmi
+      const provider = new ethers.BrowserProvider((window as any).ethereum);
+      const signer = await provider.getSigner();
       
-      const tx = await createJob({
-        args: [formData.title, formData.description, budgetWei, deadlineDays],
-      });
+      // Calculate deadline in seconds from now
+      const deadlineDate = new Date(formData.deadline);
+      const deadlineSeconds = Math.floor(deadlineDate.getTime() / 1000);
+      
+      // Use ethersClient to create job on blockchain
+      const tx = await ethersClient.createJob(
+        signer,
+        formData.title,
+        formData.description,
+        formData.budget,
+        deadlineSeconds
+      );
+      
+      console.log('Job created:', tx);
       
       // Create job in database
       const response = await fetch('/api/jobs', {
@@ -104,7 +105,7 @@ export default function PostJobPage() {
                 id="title"
                 type="text"
                 value={formData.title}
-                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, title: e.target.value })}
                 placeholder="e.g., Senior Solidity Developer"
                 required
               />
@@ -117,7 +118,7 @@ export default function PostJobPage() {
               <Textarea
                 id="description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setFormData({ ...formData, description: e.target.value })}
                 placeholder="Describe the job requirements, responsibilities, and expectations..."
                 rows={6}
                 required
@@ -135,7 +136,7 @@ export default function PostJobPage() {
                   step="0.001"
                   min="0"
                   value={formData.budget}
-                  onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, budget: e.target.value })}
                   placeholder="e.g., 1.5"
                   required
                 />
@@ -149,7 +150,7 @@ export default function PostJobPage() {
                   id="deadline"
                   type="date"
                   value={formData.deadline}
-                  onChange={(e) => setFormData({ ...formData, deadline: e.target.value })}
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, deadline: e.target.value })}
                   min={new Date().toISOString().split('T')[0]}
                   required
                 />
@@ -164,18 +165,17 @@ export default function PostJobPage() {
                 id="skills"
                 type="text"
                 value={formData.skills}
-                onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, skills: e.target.value })}
                 placeholder="e.g., Solidity, React, TypeScript, Web3"
               />
             </div>
 
             <Button
               type="submit"
-              isLoading={isSubmitting}
-              disabled={!formData.title || !formData.description || !formData.budget || !formData.deadline}
+              disabled={isSubmitting || !formData.title || !formData.description || !formData.budget || !formData.deadline}
               className="w-full"
             >
-              Post Job
+              {isSubmitting ? 'Posting...' : 'Post Job'}
             </Button>
           </form>
         </CardContent>
