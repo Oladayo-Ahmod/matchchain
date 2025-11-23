@@ -1,16 +1,29 @@
+/* --------------------------- */
+/* Tailwind Setup              */
+/* --------------------------- */
+
 @import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* --------------------------- */
+/* Root Variables (Light Mode) */
+/* --------------------------- */
 
 :root {
   --background: #ffffff;
   --foreground: #171717;
+
+  /* Tailwind HSL variables */
+  --background-hsl: 0 0% 100%;
+  --foreground-hsl: 222.2 84% 4.9%;
+  --border: 214.3 31.8% 91.4%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* --------------------------- */
+/* Dark Mode Variables         */
+/* --------------------------- */
 
 @media (prefers-color-scheme: dark) {
   :root {
@@ -19,8 +32,53 @@
   }
 }
 
+/* Dark mode class-based (Tailwind style) */
+@layer base {
+  .dark {
+    --background-hsl: 222.2 84% 4.9%;
+    --foreground-hsl: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+  }
+}
+
+/* --------------------------- */
+/* Inline Theme for Tailwind   */
+/* --------------------------- */
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+/* --------------------------- */
+/* Base body style             */
+/* --------------------------- */
+
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --------------------------- */
+/* Utilities Layer             */
+/* --------------------------- */
+
+@layer utilities {
+  .line-clamp-3 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+}
+
+/* --------------------------- */
+/* Smooth Transition Effects   */
+/* --------------------------- */
+
+* {
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }

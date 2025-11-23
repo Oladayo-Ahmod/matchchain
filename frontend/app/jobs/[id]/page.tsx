@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
-import { JobDetails } from './components/JobDetails';
-import { ApplySection } from './components/ApplySection';
+import { JobDetails } from '../components/JobDetails';
+import { ApplySection } from '../components/ApplySection';
 
 async function getJob(id: string) {
   try {

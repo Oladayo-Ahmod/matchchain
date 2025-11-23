@@ -5,7 +5,7 @@ import { useAccount } from 'wagmi';
 import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Textarea } from '../../components/ui/Textarea';
-import { ConnectWalletPrompt } from '../../components/ConnectWalletPrompt';
+import { ConnectWalletPrompt } from './ConnectWalletPrompt';
 
 interface ApplySectionProps {
   job: {

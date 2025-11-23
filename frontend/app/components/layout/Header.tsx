@@ -1,6 +1,7 @@
 'use client';
 
 import { useAccount, useConnect, useDisconnect } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from '../ui/Button';
 import { Link } from '../ui/Link';
 
@@ -46,12 +47,11 @@ export function Header() {
                 </Button>
               </div>
             ) : (
-              <Button
-                onClick={() => connect({ connector: connectors[0] })}
-                size="sm"
-              >
-                Connect Wallet
-              </Button>
+               <ConnectButton 
+                showBalance={false}
+                chainStatus="icon"
+                accountStatus="full"
+              />
             )}
           </div>
         </div>

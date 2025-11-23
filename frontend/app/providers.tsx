@@ -2,13 +2,15 @@
 
 import { WagmiProvider, createConfig, http } from 'wagmi';
 import { polygonMumbai } from 'wagmi/chains';
-import { metaMask } from 'wagmi/connectors';
+import { injected } from 'wagmi/connectors';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RainbowKitProvider } from '@rainbow-me/rainbowkit';
+import '@rainbow-me/rainbowkit/styles.css';
 
 const config = createConfig({
   chains: [polygonMumbai],
   connectors: [
-    metaMask(),
+    injected(),
   ],
   transports: {
     [polygonMumbai.id]: http(),
@@ -21,7 +23,9 @@ export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
-        {children}
+        <RainbowKitProvider>
+          {children}
+        </RainbowKitProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
