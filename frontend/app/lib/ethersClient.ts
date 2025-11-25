@@ -1,10 +1,13 @@
-import { ethers } from 'ethers';
-import JobRegistryABI from './abis/JobRegistry.json';
-import EscrowVaultABI from './abis/EscrowVault.json';
+import { ethers } from "ethers";
+import JobRegistryABI from "./abis/JobRegistry.json";
+import EscrowVaultABI from "./abis/EscrowVault.json";
 
 const JOB_REGISTRY_ADDRESS = process.env.NEXT_PUBLIC_JOB_REGISTRY_ADDRESS;
 const ESCROW_VAULT_ADDRESS = process.env.NEXT_PUBLIC_ESCROW_VAULT_ADDRESS;
-const AMOY_RPC_URL = process.env.NEXT_PUBLIC_AMOY_RPC_URL;
+const AMOY_RPC_URL =
+  process.env.NEXT_PUBLIC_AMOY_RPC_URL || "https://rpc-amoy.polygon.technology";
+
+console.log("RPC:", process.env.NEXT_PUBLIC_AMOY_RPC_URL);
 
 export interface Job {
   id: bigint;
@@ -21,7 +24,7 @@ export interface Job {
 export interface Escrow {
   id: bigint;
   employer: string;
-  freelancer: string; 
+  freelancer: string;
   jobId: bigint;
   amount: bigint;
   status: number;
@@ -31,88 +34,136 @@ export interface Escrow {
 
 class EthersClient {
   private provider: ethers.JsonRpcProvider;
-  private signer: ethers.Signer | any;
-  private jobRegistry: ethers.Contract;
-  private escrowVault: ethers.Contract;
+  private jobRegistryABI: any;
+  private escrowVaultABI: any;
 
   constructor() {
     if (!AMOY_RPC_URL || !JOB_REGISTRY_ADDRESS || !ESCROW_VAULT_ADDRESS) {
-      throw new Error('Missing required environment variables for Ethers client');
+      throw new Error(
+        "Missing required environment variables for Ethers client"
+      );
     }
 
     this.provider = new ethers.JsonRpcProvider(AMOY_RPC_URL);
-    this.signer = this.provider.getSigner();
-    this.jobRegistry = new ethers.Contract(JOB_REGISTRY_ADDRESS, JobRegistryABI, this.signer);
-    this.escrowVault = new ethers.Contract(ESCROW_VAULT_ADDRESS, EscrowVaultABI, this.signer);
+    this.jobRegistryABI = JobRegistryABI;
+    this.escrowVaultABI = EscrowVaultABI;
   }
 
   async getActiveJobs(): Promise<Job[]> {
     try {
-      return await this.jobRegistry.getActiveJobs();
+      const contract = new ethers.Contract(
+        JOB_REGISTRY_ADDRESS!,
+        this.jobRegistryABI,
+        this.provider
+      );
+      return await contract.getActiveJobs();
     } catch (error) {
-      console.error('Error fetching active jobs:', error);
+      console.error("Error fetching active jobs:", error);
       return [];
     }
   }
 
   async getJob(jobId: number): Promise<Job | null> {
     try {
-      return await this.jobRegistry.getJob(jobId);
+      const contract = new ethers.Contract(
+        JOB_REGISTRY_ADDRESS!,
+        this.jobRegistryABI,
+        this.provider
+      );
+      return await contract.getJob(jobId);
     } catch (error) {
-      console.error('Error fetching job:', error);
+      console.error("Error fetching job:", error);
       return null;
     }
   }
 
+  private async getSigner() {
+    if (typeof window === "undefined") {
+      throw new Error("Signer is only available in the browser");
+    }
+
+    const provider = new ethers.BrowserProvider((window as any).ethereum);
+    return provider.getSigner();
+  }
+
   async createJob(
-    signer: ethers.Signer,
+     signer: ethers.Signer,
     title: string,
     description: string,
     budget: string,
     deadline: number
   ): Promise<ethers.ContractTransaction> {
+    const contract = new ethers.Contract(
+      JOB_REGISTRY_ADDRESS!,
+      this.jobRegistryABI,
+      signer
+    );
     const budgetWei = ethers.parseEther(budget);
-    return await this.jobRegistry.createJob(title, description, budgetWei, deadline);
+    return await contract.createJob(title, description, budgetWei, deadline);
   }
 
   async assignFreelancer(
-    signer: ethers.Signer,
     jobId: number,
     freelancerAddress: string
   ): Promise<ethers.ContractTransaction> {
-    return await this.jobRegistry.assignFreelancer(jobId, freelancerAddress);
+    const signer = await this.getSigner();
+    const contract = new ethers.Contract(
+      JOB_REGISTRY_ADDRESS!,
+      this.jobRegistryABI,
+      signer
+    );
+    return await contract.assignFreelancer(jobId, freelancerAddress);
   }
-  
 
   async createEscrow(
-    signer: ethers.Signer,
     jobId: number,
     freelancerAddress: string,
     amount: string
   ): Promise<ethers.ContractTransaction> {
+    const signer = await this.getSigner();
+    const contract = new ethers.Contract(
+      ESCROW_VAULT_ADDRESS!,
+      this.escrowVaultABI,
+      signer
+    );
     const amountWei = ethers.parseEther(amount);
-    return await this.escrowVault.createEscrow(jobId, freelancerAddress, { value: amountWei });
+    return await contract.createEscrow(jobId, freelancerAddress, {
+      value: amountWei,
+    });
   }
 
   async releaseMilestone(
-    signer: ethers.Signer,
     escrowId: number
   ): Promise<ethers.ContractTransaction> {
-    return await this.escrowVault.releaseMilestone(escrowId);
+    const signer = await this.getSigner();
+    const contract = new ethers.Contract(
+      ESCROW_VAULT_ADDRESS!,
+      this.escrowVaultABI,
+      signer
+    );
+    return await contract.releaseMilestone(escrowId);
   }
 
-  async refundEscrow(
-    signer: ethers.Signer,
-    escrowId: number
-  ): Promise<ethers.ContractTransaction> {
-    return await this.escrowVault.refund(escrowId);
+  async refundEscrow(escrowId: number): Promise<ethers.ContractTransaction> {
+    const signer = await this.getSigner();
+    const contract = new ethers.Contract(
+      ESCROW_VAULT_ADDRESS!,
+      this.escrowVaultABI,
+      signer
+    );
+    return await contract.refund(escrowId);
   }
 
   async getEscrowByJob(jobId: number): Promise<Escrow | null> {
     try {
-      return await this.escrowVault.getEscrowByJob(jobId);
+      const contract = new ethers.Contract(
+        ESCROW_VAULT_ADDRESS!,
+        this.escrowVaultABI,
+        this.provider
+      );
+      return await contract.getEscrowByJob(jobId);
     } catch (error) {
-      console.error('Error fetching escrow:', error);
+      console.error("Error fetching escrow:", error);
       return null;
     }
   }
