@@ -5,20 +5,8 @@ import { Card, CardContent, CardHeader } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { Link } from '../../components/ui/Link';
 import { Badge } from '../../components/ui/Badge';
+import type { Job } from '@/app/lib/supabase';
 
-interface Job {
-  id: string;
-  title: string;
-  description: string;
-  budget: number;
-  deadline: string;
-  status: string;
-  employer: {
-    name: string;
-    walletAddress: string;
-  };
-  applications: { id: string }[];
-}
 
 export function JobList() {
   const [jobs, setJobs] = useState<Job[]>([]);
@@ -35,12 +23,7 @@ export function JobList() {
 
   async function fetchJobs() {
     try {
-      const queryParams = new URLSearchParams();
-      if (filters.search) queryParams.append('search', filters.search);
-      if (filters.minBudget) queryParams.append('minBudget', filters.minBudget.toString());
-      if (filters.maxBudget) queryParams.append('maxBudget', filters.maxBudget.toString());
-
-      const response = await fetch(`/api/jobs?${queryParams}`);
+      const response = await fetch('/api/jobs');
       const data = await response.json();
       setJobs(data.jobs || []);
     } catch (error) {
@@ -65,7 +48,7 @@ export function JobList() {
                   {job.title}
                 </h3>
                 <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
-                  Posted by {job.employer.name}
+                  Posted by {job.employer?.name}
                 </p>
               </div>
               <Badge variant="secondary">
@@ -82,7 +65,7 @@ export function JobList() {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
                 <span>
-                  Applications: {job.applications.length}
+                  Applications: {job.applications_count || 0}
                 </span>
                 <span>
                   Deadline: {new Date(job.deadline).toLocaleDateString()}

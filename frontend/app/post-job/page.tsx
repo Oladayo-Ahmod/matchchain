@@ -36,7 +36,6 @@ export default function PostJobPage() {
 
     setIsSubmitting(true);
     try {
-      // Get provider and signer from wagmi
       const provider = new ethers.BrowserProvider((window as any).ethereum);
       const signer = await provider.getSigner();
       
@@ -44,7 +43,7 @@ export default function PostJobPage() {
       const deadlineDate = new Date(formData.deadline);
       const deadlineSeconds = Math.floor(deadlineDate.getTime() / 1000);
       
-      // Use ethersClient to create job on blockchain
+      // create job
       const tx = await ethersClient.createJob(
         signer,
         formData.title,
