@@ -30,7 +30,7 @@ export function JobDetails({ job }: JobDetailsProps) {
                 {job.title}
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-300">
-                Posted by {job.employer.name}
+                Posted by {job.employer?.name}
               </p>
             </div>
             <Badge variant="primary" size="lg">

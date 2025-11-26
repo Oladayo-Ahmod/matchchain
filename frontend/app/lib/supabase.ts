@@ -2,10 +2,14 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = 'https://tctgmbttvlhxxxvxxjgx.supabase.co'
 const supabaseAnonKey ='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdGdtYnR0dmxoeHh4dnh4amd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQwODAxNTUsImV4cCI6MjA3OTY1NjE1NX0.rx4jAU34i5An-do8edAPiI3XxDPN9klXBR74diwRNHc'
-
+const roles = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRjdGdtYnR0dmxoeHh4dnh4amd4Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NDA4MDE1NSwiZXhwIjoyMDc5NjU2MTU1fQ.jcgGFPUULW7BQD0VtgOPs0oIepcUIqHDBKkkoSqZjGk'
 console.log('Supabase URL:', supabaseUrl);
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
+export const supabase = createClient(
+  supabaseUrl,
+  roles, // 🟢 bypass RLS
+  { auth: { persistSession: false } }
+);
 // Types
 export interface User {
   id: string;

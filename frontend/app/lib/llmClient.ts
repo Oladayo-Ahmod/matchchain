@@ -46,20 +46,14 @@ class LLMClient {
     }
 
     // --- Anthropic ---
-    else if (
-      this.provider === "anthropic" &&
-      process.env.ANTHROPIC_API_KEY
-    ) {
+    else if (this.provider === "anthropic" && process.env.ANTHROPIC_API_KEY) {
       this.anthropic = new Anthropic({
         apiKey: process.env.ANTHROPIC_API_KEY,
       });
     }
 
     // --- OpenRouter ---
-    else if (
-      this.provider === "openrouter" &&
-      process.env.OPENROUTER_API_KEY
-    ) {
+    else if (this.provider === "openrouter" && process.env.OPENROUTER_API_KEY) {
       this.openai = new OpenAI({
         apiKey: process.env.OPENROUTER_API_KEY,
         baseURL: "https://openrouter.ai/api/v1",
@@ -94,7 +88,7 @@ Skills: ${skills.join(", ")}
 Return ONLY valid JSON array:
 [
   {
-    "id": "unique_id",
+    "id": "unique_id", 
     "question": "...",
     "type": "technical|behavioral|situational",
     "maxDuration": 120
@@ -267,33 +261,32 @@ Return ONLY valid JSON:
         question: `Tell me about your experience with ${
           skills?.[0] || "relevant technologies"
         }`,
-        type: "technical",
+        type: "technical" as const,
         maxDuration: 120,
       },
       {
         id: "fallback_2",
         question:
           "Describe a challenging project you worked on and how you handled it.",
-        type: "behavioral",
+        type: "behavioral" as const,
         maxDuration: 180,
       },
       {
         id: "fallback_3",
         question: "How do you learn new technologies?",
-        type: "behavioral",
+        type: "behavioral" as const,
         maxDuration: 120,
       },
       {
         id: "fallback_4",
         question: "What coding best practices do you follow?",
-        type: "technical",
+        type: "technical" as const,
         maxDuration: 150,
       },
       {
         id: "fallback_5",
-        question:
-          "How do you handle multiple priorities and tight deadlines?",
-        type: "situational",
+        question: "How do you handle multiple priorities and tight deadlines?",
+        type: "situational" as const,
         maxDuration: 120,
       },
     ].slice(0, count);

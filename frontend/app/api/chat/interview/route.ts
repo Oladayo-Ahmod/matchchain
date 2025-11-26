@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { llmClient } from '../../../../lib/llmClient';
+import { llmClient } from '@/app/lib/llmClient';
 
 export async function POST(request: NextRequest) {
   try {

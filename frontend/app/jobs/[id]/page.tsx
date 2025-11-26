@@ -2,22 +2,25 @@ import { notFound } from 'next/navigation';
 import { JobDetails } from '../components/JobDetails';
 import { ApplySection } from '../components/ApplySection';
 
+import { supabase } from "@/app/lib/supabase";
+
 async function getJob(id: string) {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/jobs/${id}`, {
-      next: { revalidate: 60 }
-    });
-    
-    if (!response.ok) return null;
-    return await response.json();
-  } catch (error) {
-    return null;
-  }
+  const { data, error } = await supabase
+    .from("jobs")
+    .select("*, users(*)")
+    .eq("id", id)
+    .single();
+
+  if (error) return null;
+
+  return { job: data };
 }
 
-export default async function JobPage({ params }: { params: { id: string } }) {
-  const data = await getJob(params.id);
-  
+
+export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;  // ⬅️ FIX
+  const data = await getJob(id);
+
   if (!data?.job) {
     notFound();
   }
@@ -28,7 +31,7 @@ export default async function JobPage({ params }: { params: { id: string } }) {
         <div className="lg:col-span-2">
           <JobDetails job={data.job} />
         </div>
-        
+
         <div className="lg:col-span-1">
           <ApplySection job={data.job} />
         </div>
