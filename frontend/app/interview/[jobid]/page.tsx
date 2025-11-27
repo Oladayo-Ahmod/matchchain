@@ -66,11 +66,13 @@ export default function InterviewPage() {
 
   async function initializeInterview() {
     try {
+      console.log('Initializing interview for jobId:', jobId, 'and wallet:', address);  
       setError(null);
       setIsLoading(true);
 
       // Check if user has applied for this job
       const applicationCheck = await fetch(`/api/applications/check?jobId=${jobId}&freelancerWallet=${address}`);
+      console.log('Application check response:', applicationCheck);
       if (!applicationCheck.ok) {
         throw new Error('You need to apply for this job before taking the interview');
       }
@@ -80,7 +82,7 @@ export default function InterviewPage() {
       if (!jobResponse.ok) {
         throw new Error('Job not found');
       }
-
+      console.log('Job response:', jobResponse);
       const jobData = await jobResponse.json();
       setJob(jobData.job);
 
