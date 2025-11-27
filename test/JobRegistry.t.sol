@@ -1,6 +1,6 @@
 // SPDX-LIcense-Identifier: UNLICENSED
 pragma solidity ^0.8.24;
-import {Test,console} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {JobRegistry} from "../src/JobRegistry.sol";
 
 contract JobRegistryTest is Test {
@@ -18,7 +18,15 @@ contract JobRegistryTest is Test {
 
         uint256 jobId = jobRegistry.createJob(title, description, budget, deadline);
 
-        (uint256 id, address employer, string memory returnedTitle, string memory returnedDescription, uint256 returnedBudget, uint256 returnedDeadline, , bool isActive, ) = jobRegistry.jobs(jobId);
+        (
+            uint256 id,
+            address employer,
+            string memory returnedTitle,
+            string memory returnedDescription,
+            uint256 returnedBudget,
+            uint256 returnedDeadline,,
+            bool isActive,
+        ) = jobRegistry.jobs(jobId);
 
         assertEq(id, jobId);
         assertEq(employer, address(this));
@@ -28,6 +36,7 @@ contract JobRegistryTest is Test {
         assertEq(returnedDeadline, deadline);
         assertEq(isActive, true);
     }
+
     function testAssignFreelancer() public {
         string memory title = "Test Job";
         string memory description = "This is a test job";
@@ -38,11 +47,9 @@ contract JobRegistryTest is Test {
         uint256 jobId = jobRegistry.createJob(title, description, budget, deadline);
         jobRegistry.assignFreelancer(jobId, freelancer);
 
-        (, , , , , , address assignedFreelancer, , ) = jobRegistry.jobs(jobId);
+        (,,,,,, address assignedFreelancer,,) = jobRegistry.jobs(jobId);
 
         assertEq(assignedFreelancer, freelancer);
     }
-
 }
-
 

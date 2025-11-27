@@ -16,25 +16,15 @@ contract JobRegistry {
 
     mapping(uint256 => Job) public jobs;
     uint256 public jobCount;
-    
-    event JobCreated(
-        uint256 indexed jobId,
-        address indexed employer,
-        string title,
-        uint256 budget
-    );
-    
-    event FreelancerAssigned(
-        uint256 indexed jobId,
-        address indexed freelancer
-    );
 
-    function createJob(
-        string memory _title,
-        string memory _description,
-        uint256 _budget,
-        uint256 _deadline
-    ) external returns (uint256) {
+    event JobCreated(uint256 indexed jobId, address indexed employer, string title, uint256 budget);
+
+    event FreelancerAssigned(uint256 indexed jobId, address indexed freelancer);
+
+    function createJob(string memory _title, string memory _description, uint256 _budget, uint256 _deadline)
+        external
+        returns (uint256)
+    {
         jobCount++;
         jobs[jobCount] = Job({
             id: jobCount,
@@ -47,7 +37,7 @@ contract JobRegistry {
             isActive: true,
             createdAt: block.timestamp
         });
-        
+
         emit JobCreated(jobCount, msg.sender, _title, _budget);
         return jobCount;
     }
@@ -56,7 +46,7 @@ contract JobRegistry {
         require(jobs[_jobId].employer == msg.sender, "Only employer can assign");
         require(jobs[_jobId].isActive, "Job not active");
         require(jobs[_jobId].assignedFreelancer == address(0), "Freelancer already assigned");
-        
+
         jobs[_jobId].assignedFreelancer = _freelancer;
         emit FreelancerAssigned(_jobId, _freelancer);
     }
@@ -72,7 +62,7 @@ contract JobRegistry {
                 activeCount++;
             }
         }
-        
+
         Job[] memory activeJobs = new Job[](activeCount);
         uint256 currentIndex = 0;
         for (uint256 i = 1; i <= jobCount; i++) {

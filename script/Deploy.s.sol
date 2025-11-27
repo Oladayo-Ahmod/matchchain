@@ -9,24 +9,24 @@ import {console} from "forge-std/console.sol";
 /**
  * @title DeployScript
  * @notice Deployment script for EscrowVault and JobRegistry contracts
- * 
+ *
  * Usage:
- * 
+ *
  * 1. Dry Run (simulate deployment, no gas spent):
  *    forge script script/Deploy.s.sol --rpc-url <RPC_URL>
- * 
+ *
  * 2. Broadcast to Testnet (requires private key):
  *    forge script script/Deploy.s.sol --rpc-url <RPC_URL> --private-key <PRIVATE_KEY> --broadcast
- * 
+ *
  * 3. Broadcast to Mainnet (requires private key):
  *    forge script script/Deploy.s.sol --rpc-url <RPC_URL> --private-key <PRIVATE_KEY> --broadcast --verify
- * 
+ *
  * 4. Dry Run on Anvil (local):
  *    forge script script/Deploy.s.sol
- * 
+ *
  * 5. Broadcast on Anvil (local):
  *    forge script script/Deploy.s.sol --broadcast
- * 
+ *
  * Environment Setup:
  * - Set RPC_URL: export RPC_URL="https://eth-sepolia.g.alchemy.com/v2/YOUR_API_KEY"
  * - Set PRIVATE_KEY: export PRIVATE_KEY="0x..."

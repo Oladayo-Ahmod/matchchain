@@ -2,7 +2,13 @@
 pragma solidity ^0.8.24;
 
 contract EscrowVault {
-    enum EscrowStatus { Created, Funded, Released, Refunded, Cancelled }
+    enum EscrowStatus {
+        Created,
+        Funded,
+        Released,
+        Refunded,
+        Cancelled
+    }
 
     struct Escrow {
         uint256 id;
@@ -43,7 +49,7 @@ contract EscrowVault {
         jobToEscrow[_jobId] = escrowCount;
 
         emit EscrowCreated(escrowCount, _jobId, msg.sender);
-        
+
         return escrowCount;
     }
 
@@ -68,7 +74,7 @@ contract EscrowVault {
         escrow.status = EscrowStatus.Released;
         escrow.releasedAt = block.timestamp;
 
-        (bool success, ) = escrow.freelancer.call{value: escrow.amount}("");
+        (bool success,) = escrow.freelancer.call{value: escrow.amount}("");
         require(success, "Transfer failed");
 
         emit EscrowReleased(_escrowId, escrow.freelancer, escrow.amount);
@@ -82,7 +88,7 @@ contract EscrowVault {
 
         escrow.status = EscrowStatus.Refunded;
 
-        (bool success, ) = escrow.employer.call{value: escrow.amount}("");
+        (bool success,) = escrow.employer.call{value: escrow.amount}("");
         require(success, "Transfer failed");
 
         emit EscrowRefunded(_escrowId, escrow.employer, escrow.amount);
@@ -101,5 +107,5 @@ contract EscrowVault {
         return escrows[jobToEscrow[_jobId]];
     }
 
-     receive() external payable{}
+    receive() external payable {}
 }
