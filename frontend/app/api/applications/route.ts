@@ -101,22 +101,32 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const { data: freelancer, error: freelancerError } = await supabase
+      .from("users")
+      .select("id")
+      .eq("wallet_address", freelancerWallet)
+      .single();
+
+    if (freelancerError || !freelancer) {
+      return NextResponse.json(
+        { error: "Freelancer not found" },
+        { status: 404 }
+      );
+    }
+
+    const freelancerId = freelancer.id;
+
     const { data: applications, error } = await supabase
       .from("applications")
-      .select(
-        `
+      .select(`
         *,
         job:jobs(
           *,
           employer:users!jobs_employer_id_fkey(name, wallet_address)
         ),
         freelancer:users!applications_freelancer_id_fkey(name, wallet_address)
-      `
-      )
-      .eq(
-        "freelancer:users!applications_freelancer_id_fkey(wallet_address)",
-        freelancerWallet
-      )
+      `)
+      .eq("freelancer_id", freelancerId)
       .order("created_at", { ascending: false });
 
     if (error) {
@@ -132,3 +142,4 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
