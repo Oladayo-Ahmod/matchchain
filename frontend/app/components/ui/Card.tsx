@@ -52,6 +52,8 @@ const CardHeader = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   )
 );
 
+CardHeader.displayName = 'CardHeader';
+
 const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
   ({ className, ...props }, ref) => (
     <div 
@@ -61,6 +63,8 @@ const CardContent = forwardRef<HTMLDivElement, HTMLAttributes<HTMLDivElement>>(
     />
   )
 );
+
+CardContent.displayName = 'CardContent';
 
 export { Card, CardHeader, CardContent };
 export type { CardProps };
