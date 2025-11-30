@@ -3,9 +3,11 @@ import { supabase } from '@/app/lib/supabase';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
+    
     const { data: job, error } = await supabase
       .from('jobs')
       .select(`
@@ -17,7 +19,7 @@ export async function GET(
           freelancer:users!applications_freelancer_id_fkey(name, wallet_address)
         )
       `)
-      .eq('id', params.id)
+      .eq('id', id)
       .single();
 
     if (error) {

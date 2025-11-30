@@ -33,7 +33,7 @@ export default function InterviewPage() {
   const params = useParams();
   const router = useRouter();
   const { isConnected, address } = useAccount();
-  const jobId = params.jobid as string;
+  const jobId = params.jobId as string;
   
   const [job, setJob] = useState<JobDetails | null>(null);
   const [questions, setQuestions] = useState<InterviewQuestion[]>([]);

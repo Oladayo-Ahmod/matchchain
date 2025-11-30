@@ -18,7 +18,7 @@ async function getJob(id: string) {
 
 
 export default async function JobPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;  // ⬅️ FIX
+  const { id } = await params; 
   const data = await getJob(id);
 
   if (!data?.job) {

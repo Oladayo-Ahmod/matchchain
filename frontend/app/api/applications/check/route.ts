@@ -7,6 +7,7 @@ export async function GET(request: NextRequest) {
     const jobId = searchParams.get('jobId');
     const freelancerWallet = searchParams.get('freelancerWallet');
 
+    console.log('Received parameters:', { jobId, freelancerWallet });
     if (!jobId || !freelancerWallet) {
       return NextResponse.json(
         { error: 'Missing required parameters' },
@@ -14,11 +15,26 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    // First, find the freelancer user by wallet address
+    const { data: freelancer, error: freelancerError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('wallet_address', freelancerWallet)
+      .single();
+
+    if (freelancerError || !freelancer) {
+      return NextResponse.json(
+        { error: 'Freelancer not found' },
+        { status: 404 }
+      );
+    }
+
+    // Then query the application
     const { data: application, error } = await supabase
       .from('applications')
       .select('id, status')
       .eq('job_id', jobId)
-      .eq('freelancer:users!applications_freelancer_id_fkey(wallet_address)', freelancerWallet)
+      .eq('freelancer_id', freelancer.id)
       .single();
 
     if (error || !application) {
