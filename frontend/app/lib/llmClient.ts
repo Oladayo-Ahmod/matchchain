@@ -54,6 +54,8 @@ class LLMClient {
 
     // --- OpenRouter ---
     else if (this.provider === "openrouter" && process.env.OPENROUTER_API_KEY) {
+
+      console.log(process.env.OPENROUTER_API_KEY,'<<<<<<<<<<');
       this.openai = new OpenAI({
         apiKey: process.env.OPENROUTER_API_KEY,
         baseURL: "https://openrouter.ai/api/v1",
@@ -163,8 +165,8 @@ Return ONLY valid JSON:
         const openaiRes = await this.openai.chat.completions.create({
           model:
             this.provider === "openrouter"
-              ? "meta-llama/llama-3-8b-instruct" // FREE
-              : "gpt-4o-mini", // cheap + strong
+              ? "x-ai/grok-4.1-fast:free"
+              : "x-ai/grok-4.1-fast:free",
           messages: [{ role: "user", content: prompt }],
           temperature: 0.7,
         });
