@@ -26,6 +26,7 @@ export function JobList() {
       const response = await fetch('/api/jobs');
       const data = await response.json();
       setJobs(data.jobs || []);
+      console.log('Fetched jobs:', data.jobs);
     } catch (error) {
       console.error('Error fetching jobs:', error);
     } finally {

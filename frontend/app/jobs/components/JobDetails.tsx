@@ -10,12 +10,12 @@ interface JobDetailsProps {
     description: string;
     budget: number;
     deadline: string;
-    employer: {
+    users: {
       name: string;
-      walletAddress: string;
+      wallet_address: string;
     };
     skills: string[];
-    createdAt: string;
+    created_at: string;
   };
 }
 
@@ -30,7 +30,7 @@ export function JobDetails({ job }: JobDetailsProps) {
                 {job.title}
               </h1>
               <p className="text-lg text-gray-600 dark:text-gray-300">
-                Posted by {job.employer?.name}
+                Posted by {job.users?.name}
               </p>
             </div>
             <Badge variant="primary" size="lg">
@@ -76,7 +76,7 @@ export function JobDetails({ job }: JobDetailsProps) {
                 <div className="flex justify-between">
                   <span className="text-gray-600 dark:text-gray-300">Posted:</span>
                   <span className="text-gray-900 dark:text-white">
-                    {new Date(job.createdAt).toLocaleDateString()}
+                    {new Date(job.created_at).toLocaleDateString()}
                   </span>
                 </div>
                 <div className="flex justify-between">

@@ -9,7 +9,6 @@ export async function GET(request: NextRequest) {
     const maxBudget = searchParams.get('maxBudget');
     const skills = searchParams.get('skills');
 
-    // Build query
     let query = supabase
       .from('jobs')
       .select(`
@@ -44,7 +43,12 @@ export async function GET(request: NextRequest) {
       throw error;
     }
 
-    return NextResponse.json({ jobs: jobs || [] });
+    const formattedJobs = (jobs || []).map(job => ({
+      ...job,
+      applications_count: job.applications?.[0]?.count || 0
+    }));
+
+    return NextResponse.json({ jobs: formattedJobs });
   } catch (error) {
     console.error('Error fetching jobs:', error);
     return NextResponse.json(

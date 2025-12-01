@@ -21,6 +21,7 @@ export default async function JobPage({ params }: { params: Promise<{ id: string
   const { id } = await params; 
   const data = await getJob(id);
 
+  console.log('Job data fetched for job ID', id, ':', data);
   if (!data?.job) {
     notFound();
   }

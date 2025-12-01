@@ -45,9 +45,15 @@ export default function InterviewPage() {
   const [evaluation, setEvaluation] = useState<EvaluationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<number | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string[]>([]);
+
+  const addDebug = (msg: string) => {
+    console.log(msg);
+    setDebugInfo(prev => [...prev, `${new Date().toISOString()}: ${msg}`]);
+  };
 
   useEffect(() => {
-      console.log("DEBUG PARAM jobId =", jobId);
+    addDebug(`DEBUG PARAM jobId = ${jobId}`);
     if (jobId) {
       initializeInterview();
     }
@@ -67,13 +73,14 @@ export default function InterviewPage() {
 
   async function initializeInterview() {
     try {
-      console.log('Initializing interview for jobId:', jobId, 'and wallet:', address);  
+      addDebug(`Initializing interview for jobId: ${jobId} and wallet: ${address}`);  
       setError(null);
       setIsLoading(true);
 
       // Check if user has applied for this job
       const applicationCheck = await fetch(`/api/applications/check?jobId=${jobId}&freelancerWallet=${address}`);
-      console.log('Application check response:', applicationCheck);
+      addDebug(`Application check response status: ${applicationCheck.status}`);
+      
       if (!applicationCheck.ok) {
         throw new Error('You need to apply for this job before taking the interview');
       }
@@ -83,16 +90,17 @@ export default function InterviewPage() {
       if (!jobResponse.ok) {
         throw new Error('Job not found');
       }
-      console.log('Job response:', jobResponse);
+      
       const jobData = await jobResponse.json();
-      console.log('Job data:', jobData);
-      setJob(jobData);
+      addDebug(`Job data received: ${jobData.job?.title}`);
+      setJob(jobData.job);
 
       // Generate interview questions based on actual job data
       await generateQuestions(jobData.job);
     } catch (err) {
-      console.error('Error initializing interview:', err);
-      setError(err instanceof Error ? err.message : 'Failed to initialize interview');
+      const errMsg = err instanceof Error ? err.message : 'Failed to initialize interview';
+      addDebug(`Error initializing interview: ${errMsg}`);
+      setError(errMsg);
     } finally {
       setIsLoading(false);
     }
@@ -100,33 +108,48 @@ export default function InterviewPage() {
 
   async function generateQuestions(jobData: JobDetails) {
     try {
+      addDebug(`Generating questions for job: ${jobData.title} with skills: ${jobData.skills?.join(', ')}`);
+      
       const response = await fetch('/api/chat/interview', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           jobTitle: jobData.title,
-          skills: jobData.skills,
+          skills: jobData.skills || [],
           experienceLevel: getExperienceLevel(jobData.budget),
-          count: 7, // Optimal number for comprehensive assessment
+          count: 5, // Reduced for testing
         }),
       });
 
+      addDebug(`Question generation response status: ${response.status}`);
+      
       if (!response.ok) {
-        throw new Error('Failed to generate questions');
+        const errorText = await response.text();
+        addDebug(`Question generation failed: ${errorText}`);
+        throw new Error(`Failed to generate questions: ${response.status}`);
       }
 
       const data = await response.json();
-      setQuestions(data.questions);
+      addDebug(`Received ${data.questions?.length || 0} questions`);
       
-      // Start timer for first question
-      if (data.questions[0]?.maxDuration) {
-        setTimeRemaining(data.questions[0].maxDuration);
+      if (data.questions && data.questions.length > 0) {
+        setQuestions(data.questions);
+        
+        // Start timer for first question
+        if (data.questions[0]?.maxDuration) {
+          setTimeRemaining(data.questions[0].maxDuration);
+        }
+      } else {
+        throw new Error('No questions generated');
       }
     } catch (err) {
-      console.error('Error generating questions:', err);
-      setError('Failed to generate interview questions. Please try again.');
+      const errMsg = err instanceof Error ? err.message : 'Failed to generate interview questions';
+      addDebug(`Error generating questions: ${errMsg}`);
+      setError(errMsg);
       // Fallback to default questions
-      setQuestions(getFallbackQuestions(jobData));
+      const fallbackQuestions = getFallbackQuestions(jobData);
+      addDebug(`Using ${fallbackQuestions.length} fallback questions`);
+      setQuestions(fallbackQuestions);
     }
   }
 
@@ -140,7 +163,7 @@ export default function InterviewPage() {
     return [
       {
         id: '1',
-        question: `Tell me about your experience with ${jobData.skills[0] || 'relevant technologies'}`,
+        question: `Tell me about your experience with ${jobData.skills?.[0] || 'relevant technologies'}`,
         type: 'technical',
         maxDuration: 120
       },
@@ -184,6 +207,8 @@ export default function InterviewPage() {
       timestamp: Date.now()
     };
 
+    addDebug(`Answer submitted for question ${currentQuestionIndex + 1}: ${currentAnswer.substring(0, 50)}...`);
+
     const newAnswers = [...answers, newAnswer];
     setAnswers(newAnswers);
     setCurrentAnswer('');
@@ -195,6 +220,7 @@ export default function InterviewPage() {
       // Set timer for next question
       setTimeRemaining(questions[nextIndex]?.maxDuration || null);
     } else {
+      addDebug(`All ${newAnswers.length} answers submitted, starting evaluation...`);
       await submitInterview(newAnswers);
     }
   }
@@ -202,21 +228,49 @@ export default function InterviewPage() {
   async function submitInterview(allAnswers: InterviewAnswer[]) {
     setIsSubmitting(true);
     setError(null);
+    addDebug('Starting evaluation process...');
 
     try {
       if (!job) {
         throw new Error('Job information not available');
       }
 
-      const result = await llmClient.evaluateAnswers(
-        questions,
-        allAnswers.map(a => ({ questionId: a.questionId, answer: a.answer })),
-        `${job.title} position requiring ${job.skills.join(', ')}`
-      );
+      addDebug(`Calling llmClient.evaluateAnswers() with ${allAnswers.length} answers`);
+      addDebug(`LLM Provider: ${process.env.NEXT_PUBLIC_LLM_PROVIDER || 'not set'}`);
+      
+      // TEST: First try a simple direct API call to test OpenRouter
+      addDebug('Testing OpenRouter connection...');
+      
+      // Option 1: Use the API endpoint instead of direct llmClient
+      const evaluationResponse = await fetch('/api/chat/evaluate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          questions,
+          answers: allAnswers.map(a => ({ questionId: a.questionId, answer: a.answer })),
+          jobRequirements: `${job.title} position requiring ${(job.skills || []).join(', ')}`
+        }),
+      });
 
-      setEvaluation(result);
+      if (evaluationResponse.ok) {
+        const evaluationData = await evaluationResponse.json();
+        addDebug(`API evaluation successful with score: ${evaluationData.evaluation?.score}`);
+        setEvaluation(evaluationData.evaluation);
+      } else {
+        // Option 2: Fallback to direct llmClient
+        addDebug('API evaluation failed, trying direct llmClient...');
+        const result = await llmClient.evaluateAnswers(
+          questions,
+          allAnswers.map(a => ({ questionId: a.questionId, answer: a.answer })),
+          `${job.title} position requiring ${(job.skills || []).join(', ')}`
+        );
+        
+        addDebug(`Direct evaluation successful with score: ${result.score}`);
+        setEvaluation(result);
+      }
 
       // Save evaluation to database
+      addDebug('Saving evaluation to database...');
       const saveResponse = await fetch('/api/applications/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -224,13 +278,16 @@ export default function InterviewPage() {
           jobId,
           freelancerWallet: address,
           answers: allAnswers,
-          evaluation: result,
+          evaluation: evaluation,
           questions: questions,
         }),
       });
 
       if (!saveResponse.ok) {
+        addDebug('Failed to save evaluation to database');
         console.error('Failed to save evaluation, but interview completed');
+      } else {
+        addDebug('Evaluation saved to database successfully');
       }
 
       // Update application status to INTERVIEWING
@@ -241,13 +298,17 @@ export default function InterviewPage() {
           jobId,
           freelancerWallet: address,
           status: 'INTERVIEWING',
-          interviewScore: result.score,
+          interviewScore: evaluation?.score || 0.7,
         }),
       });
 
+      addDebug('Interview process completed successfully!');
+
     } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to submit interview';
+      addDebug(`Error submitting interview: ${errMsg}`);
       console.error('Error submitting interview:', err);
-      setError('Failed to submit interview. Please try again.');
+      setError(errMsg);
     } finally {
       setIsSubmitting(false);
     }
@@ -259,7 +320,9 @@ export default function InterviewPage() {
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   }
 
-  if (!isConnected) {
+
+
+if (!isConnected) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         <Card variant="elevated">

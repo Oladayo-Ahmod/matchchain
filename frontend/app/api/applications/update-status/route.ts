@@ -12,6 +12,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const { data: freelancer, error: userError } = await supabase
+      .from('users')
+      .select('id')
+      .eq('wallet_address', freelancerWallet)
+      .single();
+
+    if (userError || !freelancer) {
+      return NextResponse.json(
+        { error: 'Freelancer not found' },
+        { status: 404 }
+      );
+    }
+
     const { error } = await supabase
       .from('applications')
       .update({
@@ -20,13 +33,12 @@ export async function POST(request: NextRequest) {
         updated_at: new Date().toISOString()
       })
       .eq('job_id', jobId)
-      .eq('freelancer:users!applications_freelancer_id_fkey(wallet_address)', freelancerWallet);
+      .eq('freelancer_id', freelancer.id);
 
-    if (error) {
-      throw error;
-    }
+    if (error) throw error;
 
     return NextResponse.json({ success: true });
+
   } catch (error) {
     console.error('Error updating application status:', error);
     return NextResponse.json(
