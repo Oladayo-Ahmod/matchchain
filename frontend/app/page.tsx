@@ -24,9 +24,8 @@ export default function Home() {
             </p>
             
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <Button 
+              <Link 
                 size="xl" 
-                as={Link} 
                 href="/jobs"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-xl hover:shadow-2xl hover-lift"
               >
@@ -36,11 +35,10 @@ export default function Home() {
                   </svg>
                   <span>Find Your Dream Job</span>
                 </span>
-              </Button>
-              <Button 
+              </Link>
+              <Link 
                 variant="outline" 
                 size="xl" 
-                as={Link} 
                 href="/post-job"
                 className="border-2 border-blue-500/30 hover:border-blue-500/50 bg-white/10 dark:bg-gray-800/10 backdrop-blur-sm hover-lift"
               >
@@ -50,7 +48,7 @@ export default function Home() {
                   </svg>
                   <span>Post a Job</span>
                 </span>
-              </Button>
+              </Link>
             </div>
 
             {/* Stats */}
@@ -137,14 +135,13 @@ export default function Home() {
               Discover the latest opportunities in the decentralized ecosystem
             </p>
           </div>
-          <Button 
-            as={Link} 
+          <Link 
             href="/jobs" 
             variant="outline"
             className="border-blue-500/30 hover:border-blue-500/50"
           >
             View All Jobs
-          </Button>
+          </Link>
         </div>
         
         <JobList />

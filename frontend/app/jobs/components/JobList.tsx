@@ -118,14 +118,13 @@ export function JobList() {
                 <span>Due {new Date(job.deadline).toLocaleDateString()}</span>
               </div>
               
-              <Button
-                as={Link}
+              <Link
                 href={`/jobs/${job.id}`}
                 size="sm"
                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-md hover:shadow-lg transition-all"
               >
                 View Details
-              </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
@@ -143,13 +142,12 @@ export function JobList() {
             <p className="text-gray-600 dark:text-gray-400 mb-6">
               Be the first to post a job in this category!
             </p>
-            <Button 
-              as={Link} 
+            <Link 
               href="/post-job" 
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 border-0 shadow-lg hover:shadow-xl"
             >
               Post a Job
-            </Button>
+            </Link>
           </Card>
         </div>
       )}
