@@ -2,8 +2,8 @@
 module.exports = {
   darkMode: "class",
   content: [
-    "./src/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
+    "./app/**/*.{ts,tsx,js,jsx}",
+    "./components/**/*.{ts,tsx,js,jsx}",
   ],
   theme: {
     extend: {
@@ -11,6 +11,10 @@ module.exports = {
         border: "hsl(var(--border))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
+        card: "hsl(var(--card))",
+        "card-foreground": "hsl(var(--card-foreground))",
+        popover: "hsl(var(--popover))",
+        "popover-foreground": "hsl(var(--popover-foreground))",
         primary: "hsl(var(--primary))",
         "primary-foreground": "hsl(var(--primary-foreground))",
         secondary: "hsl(var(--secondary))",
@@ -21,6 +25,9 @@ module.exports = {
         "destructive-foreground": "hsl(var(--destructive-foreground))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        "glass-bg": "var(--glass-bg)",
+        "glass-border": "var(--glass-border)",
+        "glass-shadow": "var(--glass-shadow)",
       },
       borderRadius: {
         lg: "var(--radius)",
