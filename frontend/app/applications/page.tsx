@@ -106,8 +106,7 @@ export default function ApplicationsPage() {
               Track your job applications and interview progress
             </p>
           </div>
-          <Button
-            as={Link}
+          <Link
             href="/jobs"
             variant="gradient"
             className="hidden md:flex"
@@ -118,7 +117,7 @@ export default function ApplicationsPage() {
               </svg>
               <span>Find More Jobs</span>
             </span>
-          </Button>
+          </Link>
         </div>
 
         {/* Stats Cards */}
@@ -163,8 +162,7 @@ export default function ApplicationsPage() {
             You haven't applied to any jobs yet. Start your journey by exploring available opportunities.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              as={Link} 
+            <Link 
               href="/jobs" 
               variant="gradient"
               size="lg"
@@ -175,16 +173,15 @@ export default function ApplicationsPage() {
                 </svg>
                 <span>Browse Jobs</span>
               </span>
-            </Button>
-            <Button 
-              as={Link} 
+            </Link>
+            <Link 
               href="/post-job" 
               variant="outline"
               size="lg"
               className="border-blue-500/30 hover:border-blue-500/50"
             >
               Post a Job Instead
-            </Button>
+            </Link>
           </div>
         </Card>
       ) : (
@@ -299,8 +296,7 @@ export default function ApplicationsPage() {
                     </div>
                     
                     <div className="flex flex-wrap gap-2">
-                      <Button
-                        as={Link}
+                      <Link
                         href={`/jobs/${application.job.id}`}
                         variant="outline"
                         size="sm"
@@ -313,11 +309,10 @@ export default function ApplicationsPage() {
                           </svg>
                           <span>View Job</span>
                         </span>
-                      </Button>
+                      </Link>
                       
                       {application.status === 'PENDING' && (
-                        <Button
-                          as={Link}
+                        <Link
                           href={`/interview/${application.job.id}`}
                           variant="gradient"
                           size="sm"
@@ -328,12 +323,11 @@ export default function ApplicationsPage() {
                             </svg>
                             <span>Start Interview</span>
                           </span>
-                        </Button>
+                        </Link>
                       )}
 
                       {application.status === 'INTERVIEWING' && application.interview_score && (
-                        <Button
-                          as={Link}
+                        <Link
                           href={`/interview/${application.job.id}`}
                           variant="outline"
                           size="sm"
@@ -345,7 +339,7 @@ export default function ApplicationsPage() {
                             </svg>
                             <span>View Results</span>
                           </span>
-                        </Button>
+                        </Link>
                       )}
                     </div>
                   </div>
