@@ -81,7 +81,7 @@ export default function Home() {
       <div className="container mx-auto px-4 py-16">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            Why Choose <span className="gradient-text">AI JobMatch</span>?
+            Why Choose <span className="gradient-text">Matchchain</span>?
           </h2>
           <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
             Revolutionizing hiring with cutting-edge technology and blockchain security
